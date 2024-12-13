@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Song Generator</title>
+</head>
+<body>
+    <h1>Code Your Own Holiday Song</h1>
+    <form id="song-form">
+        <label for="theme">Theme:</label>
+        <select id="theme" required>
+            <option value="Christmas">Christmas</option>
+            <option value="Hanukkah">Hanukkah</option>
+            <option value="New Year">New Year</option>
+        </select>
+
+        <label for="genre">Genre:</label>
+        <select id="genre" required>
+            <option value="Pop">Pop</option>
+            <option value="Rock">Rock</option>
+            <option value="Jazz">Jazz</option>
+        </select>
+
+        <button type="submit">Generate Song</button>
+    </form>
+
+    <form id="image-form" enctype="multipart/form-data">
+        <label for="file">Upload an Image:</label>
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <h2>Your Generated Song</h2>
+    <audio id="song-audio" controls></audio>
+    <img id="uploaded-image" src="" alt="" style="max-width: 300px; display: none;">
+
+    <script>
+        document.getElementById('song-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const theme = document.getElementById('theme').value;
+            const genre = document.getElementById('genre').value;
+
+            const response = await fetch('http://127.0.0.1:5000/generate-song', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ theme, genre })
+            });
+            const data = await response.json();
+            document.getElementById('song-audio').src = data.midi_file; // You might need to convert MIDI to audio format
+        });
+
+        document.getElementById('image-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('file');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const response = await fetch('http://127.0.0.1:5000/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            document.getElementById('uploaded-image').src = data.image_path;
+            document.getElementById('uploaded-image').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
